@@ -1,0 +1,32 @@
+* autoloads file can be generated to one file. contain modules env autoload function.
+  - ~doom-autoloads-reload~ in doom.
+  - =.local/autoload.*.el=
+* Have cookie: ~autodef~ ~if~
+* Differnt Session.
+  - interactive session
+    #+BEGIN_QUOTE
+    *** Load order
+    A module's files have a precise load-order, which differs slightly depending on
+    what kind of session it is. Doom has three types of sessions:
+
+    + Interactive session :: the typical session you open when you intend to use
+    Emacs (e.g. for text editing). This loads the most, because you will likely be
+    using a lot of it.
+    + Batch session :: this is a non-interactive session, loaded when you execute
+    Emacs commands on the command line with no UI, e.g. ~emacs --batch --eval
+    '(message "Hello world")'~.
+
+    The expectation for these sessions is that it should quickly spin up, run the
+    command then quit, therefore very little is loaded in this session.
+    + CLI session :: this is the same as a batch session /except/ it is what starts
+    up when you run any =bin/doom= command.
+    #+END_QUOTE
+
+* straight.el
+ - straight can resolve the package conflicts
+ - build the package
+ - cache autoload function into one file
+ - :files of recipe can specify one file in a repo.(e.g core-lib in doom)
+ - built-in package ~:type built-in~.
+
+* change name to RZDO

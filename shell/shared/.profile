@@ -7,9 +7,9 @@ case "$OSTYPE" in
         ;;
 esac
 
-if [ -f /etc/profile ]; then
-    . /etc/profile
-fi
+# if [ -f /etc/profile ]; then
+#     . /etc/profile
+# fi
 
 ## External configuration
 ### ~/.profile.local
