@@ -82,7 +82,7 @@ Meant to be used with `run-hook-wrapped'."
 (defalias 'doom-partial #'apply-partially)
 
 (defun doom-rpartial (fn &rest args)
-  "Return a function that is a partial application of FUN to right-hand ARGS.
+  "Return a partial application of FUN to right-hand ARGS.
 
 ARGS is a list of the last N arguments to pass to FUN. The result is a new
 function which does the same as FUN, except that the last N arguments are fixed
@@ -120,6 +120,7 @@ at the values with which this function was called."
 
 (defmacro letf! (bindings &rest body)
   "Temporarily rebind function and macros in BODY.
+Intended as a simpler version of `cl-letf' and `cl-macrolet'.
 
 BINDINGS is either a) a list of, or a single, `defun' or `defmacro'-ish form, or
 b) a list of (PLACE VALUE) bindings as `cl-letf*' would accept.
@@ -154,7 +155,8 @@ the same name, for use with `funcall' or `apply'. ARGLIST and BODY are as in
   "Run FORMS without generating any output.
 
 This silences calls to `message', `load', `write-region' and anything that
-writes to `standard-output'."
+writes to `standard-output'. In interactive sessions this won't suppress writing
+to *Messages*, only inhibit output in the echo area."
   `(if doom-debug-p
        (progn ,@forms)
      ,(if doom-interactive-p
@@ -190,21 +192,24 @@ See `eval-if!' for details on this macro's purpose."
 
 ;;; Closure factories
 (defmacro fn! (arglist &rest body)
-  "Expands to (cl-function (lambda ARGLIST BODY...))"
+  "Returns (cl-function (lambda ARGLIST BODY...))
+The closure is wrapped in `cl-function', meaning ARGLIST will accept anything
+`cl-defun' will. "
   (declare (indent defun) (doc-string 1) (pure t) (side-effect-free t))
   `(cl-function (lambda ,arglist ,@body)))
 
 (defmacro cmd! (&rest body)
-  "Expands to (lambda () (interactive) ,@body).
+  "Returns (lambda () (interactive) ,@body)
 A factory for quickly producing interaction commands, particularly for keybinds
 or aliases."
   (declare (doc-string 1) (pure t) (side-effect-free t))
   `(lambda (&rest _) (interactive) ,@body))
 
 (defmacro cmd!! (command &optional prefix-arg &rest args)
-  "Expands to a closure that interactively calls COMMAND with ARGS.
-A factory for quickly producing interactive, prefixed commands for keybinds or
-aliases."
+  "Returns a closure that interactively calls COMMAND with ARGS and PREFIX-ARG.
+Like `cmd!', but allows you to change `current-prefix-arg' or pass arguments to
+COMMAND. This macro is meant to be used as a target for keybinds (e.g. with
+`define-key' or `map!')."
   (declare (doc-string 1) (pure t) (side-effect-free t))
   `(lambda (arg &rest _) (interactive "P")
      (let ((current-prefix-arg (or ,prefix-arg arg)))
@@ -214,7 +219,20 @@ aliases."
         ,command ,@args))))
 
 (defmacro cmds! (&rest branches)
-  "Expands to a `menu-item' dispatcher for keybinds."
+  "Returns a dispatcher that runs the a command in BRANCHES.
+Meant to be used as a target for keybinds (e.g. with `define-key' or `map!').
+
+BRANCHES is a flat list of CONDITION COMMAND pairs. CONDITION is a lisp form
+that is evaluated when (and each time) the dispatcher is invoked. If it returns
+non-nil, COMMAND is invoked, otherwise it falls through to the next pair.
+
+The last element of BRANCHES can be a COMMANd with no CONDITION. This acts as
+the fallback if all other conditions fail.
+
+Otherwise, Emacs will fall through the keybind and search the next keymap for a
+keybind (as if this keybind never existed).
+
+See `general-key-dispatch' for what other arguments it accepts in BRANCHES."
   (declare (doc-string 1))
   (let ((docstring (if (stringp (car branches)) (pop branches) ""))
         fallback)
@@ -330,6 +348,14 @@ This is a wrapper around `eval-after-load' that:
                (setq body `((after! ,next ,@body))))
              (car body))))))
 
+(defun handle-load-error (e target path)
+  (let* ((source (file-name-sans-extension target))
+         (err (cons 'error (file-name-directory path))))
+    (signal (car err)
+            (list (file-relative-name
+                   (concat source ".el")
+                   (cdr err))
+                  e))))
 
 (defmacro load! (filename &optional path noerror)
   "Load a file relative to the current executing file (`load-file-name').
@@ -350,8 +376,7 @@ If NOERROR is non-nil, don't throw an error if the file doesn't exist."
     `(condition-case-unless-debug e
          (let (file-name-handler-alist)
            (load ,file ,noerror 'nomessage))
-       (doom-error (signal (car e) (cdr e)))
-       (error (doom--handle-load-error e ,file ,path)))))
+       (error (handle-load-error e ,file ,path)))))
 
 (defmacro defer-until! (condition &rest body)
   "Run BODY when CONDITION is true (checks on `after-load-functions'). Meant to
@@ -422,20 +447,6 @@ advised)."
              ((symbolp sym)
               (put ',fn 'permanent-local-hook t)
               (add-hook sym #',fn ,append))))))
-
-(defmacro add-hook-trigger! (hook-var &rest targets)
-  "TODO"
-  `(let ((fn (intern (format "%s-h" ,hook-var))))
-     (fset
-      fn (lambda (&rest _)
-           (when after-init-time
-             (run-hook-wrapped ,hook-var #'doom-try-run-hook)
-             (set ,hook-var nil))))
-     (put ,hook-var 'permanent-local t)
-     (dolist (on (list ,@targets))
-       (if (functionp on)
-           (advice-add on :before fn)
-         (add-hook on fn)))))
 
 (defmacro add-hook! (hooks &rest rest)
   "A convenience macro for adding N functions to M hooks.

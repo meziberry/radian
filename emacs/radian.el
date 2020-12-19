@@ -991,12 +991,30 @@ active minibuffer, even if the minibuffer is not selected."
 (leaf swsw
   :straight (swsw :repo "https://git.sr.ht/~dsemy/swsw")
   :chord (",," . swsw-select)
+  :init (defvar swsw-window-block-regex '("\\*lsp-ui-.*"))
   :custom
   (swsw-id-chars . '(?a ?o ?e ?u ?h ?t ?n ?s))
   (swsw-scope . 'visible)
   :config
   (swsw-mode +1)
   (swsw-mode-line-conditional-display-function t)
+
+  (radian-defadvice radian--advice-swsw-update-window
+      (window)
+    :override #'swsw-update-window
+    "Block the window of buffer macthed with regex of `swsw-window-block-regex'
+ into `swsw-window-list'"
+    (let ((buffer (buffer-name (window-buffer window)))
+          (id (if (window-minibuffer-p window)
+                  swsw-minibuffer-id
+                (pop swsw-ids))))
+      (dolist (regex swsw-window-block-regex)
+        (when (string-match-p regex buffer)
+          (setq window nil)))
+      (when (and id (windowp window))
+        (push (cons id window) swsw-window-list)
+        (set-window-parameter window 'swsw-id id))))
+
   :blackout t)
 
 ;; rebind `delete-window'
@@ -2308,21 +2326,6 @@ killed (which happens during Emacs shutdown)."
 ;; such as a tooltip menu. Company stands for "Complete Anything".
 (leaf company
   :require t
-  ;; :defvar company-idle-delay company-minimum-prefix-length company-tooltip-limit
-  ;; company-tooltip-minimum company-frontends company-show-numbers company-require-match
-  ;; company-dabbrev-other-buffers company-dabbrev-ignore-case company-dabbrev-downcase
-  ;; company-tooltip-align-annotations company-active-map
- :init
-
-  (defvar radian--company-backends-global
-    '(company-capf
-      company-files
-      (company-dabbrev-code company-keywords)
-      company-dabbrev)
-    "Values for `company-backends' used everywhere.
-If `company-backends' is overridden by Radian, then these
-backends will still be included.")
-
   :bind (;; Remap the standard Emacs keybindings for invoking
          ;; completion to instead use Company. You might think this
          ;; could be put in the `:bind*' declaration below, but it
@@ -2352,9 +2355,9 @@ backends will still be included.")
           ;; user has explicitly interacted with Company. Note that
           ;; `:map' from above is "sticky", and applies also below: see
           ;; https://github.com/jwiegley/use-package/issues/334#issuecomment-349473819.
-         ;; Make RET don't trigger a completion
-         ("<return>" . nil)
-         ("RET" . nil)
+          ;; Make RET don't trigger a completion
+          ("<return>" . nil)
+          ("RET" . nil)
 
           ;; We then make <up> and <down> abort the completions menu
           ;; unless the user has interacted explicitly. Note that we
@@ -2395,7 +2398,7 @@ backends will still be included.")
 
   ;; Make completions display when you have only typed one character,
   ;; instead of three.
-  (setq company-minimum-prefix-length 1)
+  (setq company-minimum-prefix-length 2)
 
   ;; Always display the entire suggestion list onscreen, placing it
   ;; above the cursor if necessary.
@@ -2477,36 +2480,13 @@ menu to disappear and then come back after `company-idle-delay'."
 ;;;; TabNine
 (leaf company-tabnine
   :defun company-tabnine
+  :after company
   :config
-  (setq company-show-numbers t)
-  (add-to-list 'company-backends #'company-tabnine))
+  (setq company-show-numbers t
+        company-tabnine-always-trigger nil)
 
-;;;; company-lsp
-;; Package `company-lsp' provides a Company backend for `lsp-mode'.
-;; It's configured automatically by `lsp-mode'.
-(leaf company-lsp
-  :disabled t
-  :init
-
-  (leaf! lsp
-    :config
-
-    (radian-defadvice radian--company-lsp-setup (&rest _)
-      :after #'lsp
-      "Disable `company-prescient' sorting by length in some contexts.
-Specifically, disable sorting by length if the LSP Company
-backend returns fuzzy-matched candidates, which implies that the
-backend has already sorted the candidates into a reasonable
-order."
-      (setq-local company-prescient-sort-length-enable
-                  (cl-dolist (w lsp--buffer-workspaces)
-                    (when (thread-first w
-                            (lsp--workspace-client)
-                            (lsp--client-server-id)
-                            (memq '(jsts-ls mspyls bash-ls texlab ts-ls))
-                            (not))
-                      (cl-return t)))))))
-
+  (setq company-backends (cons '(company-tabnine :separate company-capf)
+                               company-backends)))
 
 ;;;; Definition location
 
@@ -3008,7 +2988,7 @@ Return either a string or nil."
                 (cl-return venv)))))))))
 ;; lsp for python
 (leaf lsp-pyright
-  :after lsp-mode python
+  :after python
   :require t)
 
 ;;;; Shell
@@ -3895,6 +3875,10 @@ This advice is only activated on macOS, where it is helpful since
 most of the Linux utilities in `dired-guess-shell-alist-default'
 are probably not going to be installed."
       "open")))
+
+;; find-name-dired find stuff from different directory.
+(leaf! find-dired
+  :init (setq find-ls-option '("-print0 | xargs -0 ls -ld" . "-ld")))
 
 ;;;; Terminal emulator
 
@@ -4846,7 +4830,7 @@ spaces."
 ;;   (modus-themes-scale-4 . 1.27)
 ;;   (modus-themes-scale-5 . 1.33))
 
-;;;; change theme and customize face
+;;;; change theme and customize face.
 (defvar radian-theme-list nil
   "Theme sequence of changing. `(THEME-NAME . IS-DARK-THEME)'")
 
@@ -4889,7 +4873,7 @@ spaces."
       (enable-theme theme))))
 
 (radian-bind-key "t" #'radian-change-theme)
-(setq radian-theme-list '((modus-vivendi . t) (modus-operandi . nil)))
+(setq radian-theme-list '((modus-vivendi . t) (modus-operandi . nil) (default . nil)))
 (radian-change-theme)
 
 ;; enable recentf-mode
