@@ -60,6 +60,10 @@ if [[ -n $radian_zplugin ]]; then
     zplugin ice blockf
     zplugin light zsh-users/zsh-completions
 
+    if typeset -f radian_zplugin_hook > /dev/null; then
+        radian_zplugin_hook
+    fi
+
     autoload -Uz compinit
     compinit
 fi
@@ -424,7 +428,7 @@ function pasteln {
 function delink {
     emulate -LR zsh
     if [[ -z $1 ]]; then
-        echo "usage: delink <symlinks>"
+        echo >&2 "usage: delink <symlinks>"
         return 1
     fi
     for link; do
@@ -433,16 +437,16 @@ function delink {
                 target=${link:A}
                 if rm $link; then
                     if cp -R $target $link; then
-                        echo "Copied $target to $link"
+                        echo >&2 "Copied $target to $link"
                     else
                         ln -s $target $link
                     fi
                 fi
             else
-                echo "Broken symlink: $link"
+                echo >&2 "Broken symlink: $link"
             fi
         else
-            echo "Not a symlink: $link"
+            echo >&2 "Not a symlink: $link"
         fi
     done
 }
@@ -486,6 +490,12 @@ fi
 if (( $+commands[emacsclient] )); then
     alias ec='emacsclient --alternate-editor= -nw'
     alias ecw='emacsclient --alternate-editor='
+fi
+
+#### fd
+
+if (( $+commands[fdfind] )); then
+    alias fd='fdfind'
 fi
 
 #### Git
@@ -601,6 +611,7 @@ if (( $+commands[git] )); then
     alias gcpa='git cherry-pick --abort'
 
     alias grv='git revert'
+    alias grva='git revert --abort'
     alias grvm='git revert -m'
 
     alias gt='git tag'

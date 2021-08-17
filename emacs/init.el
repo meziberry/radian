@@ -1,5 +1,7 @@
 ;; -*- lexical-binding: t -*-
 
+(setq debug-on-error t)
+
 ;; This file wraps the primary Radian configuration (which lives in
 ;; radian.el) so that we don't have to wrap the entire file in various
 ;; `let' forms, etc. We put as much as possible in radian.el.
@@ -30,36 +32,19 @@ loading the init-file twice if it were not for this variable.")
    (t
     (setq radian--init-file-loaded-p t)
 
-    (defvar radian-minimum-emacs-version "25.2"
+    (defvar radian-minimum-emacs-version "26.1"
       "Radian Emacs does not support any Emacs version below this.")
 
     (defvar radian-local-init-file
       (expand-file-name "init.local.el" user-emacs-directory)
       "File for local customizations of Radian.")
 
-    ;; A big contributor to startup times is garbage collection. We up the gc
-    ;; threshold to temporarily prevent it from running, then reset it later by
-    ;; enabling `gcmh-mode'. Not resetting it will cause stuttering/freezes.
-    (setq gc-cons-threshold most-positive-fixnum)
-
     ;; Prevent package.el from modifying this file.
     (setq package-enable-at-startup nil)
-    (fset #'package--ensure-init-file #'ignore)
-
-    ;; Resizing the Emacs frame can be a terribly expensive part of changing the
-    ;; font. By inhibiting this, we easily halve startup times with fonts that are
-    ;; larger than the system default.
-    (setq frame-inhibit-implied-resize t)
-
-    ;; Prevent unwanted runtime builds in gccemacs (native-comp); packages are
-    ;; compiled ahead-of-time when they are installed and site files are compiled
-    ;; when gccemacs is installed.
-    (setq comp-deferred-compilation nil)
 
     ;; Prevent Custom from modifying this file.
-    (setq custom-file (expand-file-name
-                       (format "custom-%d-%d.el" (emacs-pid) (random))
-                       temporary-file-directory))
+    (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+    (load custom-file 'noerror 'nomessage)
 
     ;; Make sure we are running a modern enough Emacs, otherwise abort
     ;; init.

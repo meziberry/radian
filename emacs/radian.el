@@ -576,7 +576,9 @@ binding the variable dynamically over the entire init-file."
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name
-        "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+        "straight/repos/straight.el/bootstrap.el"
+        (or (bound-and-true-p straight-base-dir)
+            user-emacs-directory)))
       (bootstrap-version 5))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
@@ -3060,7 +3062,7 @@ Return either a string or nil."
          ("\\.html?\\'" . web-mode)
          ;; My additions.
          ("\\.ejs\\'" . web-mode)
-         ("\\.jsx?\\'" . web-mode)
+         ("\\.[cm]?jsx?\\'" . web-mode)
          ("\\.tsx?\\'" . web-mode)
          ("\\.css\\'" . web-mode)
          ("\\.hbs\\'" . web-mode))
@@ -3096,7 +3098,7 @@ Return either a string or nil."
 
   ;; When using `web-mode' to edit JavaScript files, support JSX tags.
   (add-to-list 'web-mode-content-types-alist
-               '("jsx" . "\\.js[x]?\\'"))
+               '("jsx" . "\\.[cm]?js[x]?\\'"))
 
   ;; Create line comments instead of block comments by default in
   ;; JavaScript. See <https://github.com/fxbois/web-mode/issues/619>.
