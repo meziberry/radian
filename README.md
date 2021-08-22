@@ -1,4 +1,4 @@
-**Radian**: dotfiles that marry elegance and practicality.
+**Eow**: dotfiles that marry elegance and practicality.
 
 ## Summary
 
@@ -55,7 +55,7 @@ more stability.
     timers; by disabling of heavy autoloads; by asynchronous
     byte-compilation of the init-file in a subprocess on successful
     init, with the local init-file macroexpanded and embedded directly
-    into Radian during compilation; and by running all customizations
+    into Eow during compilation; and by running all customizations
     before the first graphical frame is initialized)
   * Aggressively consistent coding style and documentation (init-file
     is 37% comments and docstrings), including heavy use of macros to
@@ -84,7 +84,7 @@ more stability.
     [`which-key`][which-key], and more
   * Major modes for editing many languages and configuration file
     types
-  * [Tested on CircleCI](https://circleci.com/gh/raxod502/radian) with
+  * [Tested on CircleCI](https://circleci.com/gh/raxod502/eow) with
     [Docker] configuration included for all supported Emacs versions
 * [Zsh]
   * Extremely fast and flexible package manager, [zplugin]
@@ -182,7 +182,7 @@ Use symbolic links:
 
     ./emacs/init.el => ~/.emacs.d/init.el
     ./emacs/early-init.el => ~/.emacs.d/early-init.el
-    ./emacs/versions.el => ~/.emacs.d/straight/versions/radian.el
+    ./emacs/versions.el => ~/.emacs.d/straight/versions/eow.el
     ./git/.gitconfig => ~/.gitconfig
     ./git/.gitexclude => ~/.gitexclude
     ./shell/shared/.profile => ~/.profile
@@ -196,7 +196,7 @@ Do not attempt to use the `emacs` subdirectory of this repository as
 ### Installing local configuration
 
 * Emacs: `~/.emacs.d/init.local.el` (local configuration) and
-  `~/.emacs.d/straight/versions/radian-local.el` (optional, local
+  `~/.emacs.d/straight/versions/eow-local.el` (optional, local
   lockfile for `straight.el`; will be created when you run `M-x
   straight-freeze-versions`)
 * All shells: `~/.profile.local`
@@ -211,10 +211,10 @@ Here is what your `init.local.el` should probably look like:
 
     ;; code that should be run at the very beginning of init, e.g.
 
-    (setq radian-font ...)
-    (setq radian-font-size ...)
+    (setq eow-font ...)
+    (setq eow-font-size ...)
 
-    (radian-local-on-hook before-straight
+    (eow-local-on-hook before-straight
 
       ;; code that should be run right before straight.el is bootstrapped,
       ;; e.g.
@@ -222,25 +222,25 @@ Here is what your `init.local.el` should probably look like:
       (setq straight-vc-git-default-protocol ...)
       (setq straight-check-for-modifications ...))
 
-    (radian-local-on-hook after-init
+    (eow-local-on-hook after-init
 
       ;; code that should be run at the end of init, e.g.
 
       (use-package ...))
 
-    ;; see M-x customize-group RET radian-hooks RET for which hooks you
-    ;; can use with `radian-local-on-hook'
+    ;; see M-x customize-group RET eow-hooks RET for which hooks you
+    ;; can use with `eow-local-on-hook'
 
 You don't have to worry about byte-compiling your local init-file;
-Radian actually macroexpands it and embeds it directly into the
-byte-compiled Radian init-file. Using the macro `radian-local-on-hook`
-instead of defining functions and adding them to Radian's hooks
+Eow actually macroexpands it and embeds it directly into the
+byte-compiled Eow init-file. Using the macro `eow-local-on-hook`
+instead of defining functions and adding them to Eow's hooks
 manually enables some magic that makes this actually work properly.
 
 ## Contributing
 
 Please feel free to contribute in any way that you would like. If you
-find a bug or have a question about how to use Radian, [report
+find a bug or have a question about how to use Eow, [report
 it][issues]. If you want to contribute code, [please do][prs]. (Try to
 follow the style of the surrounding code.)
 
@@ -288,7 +288,7 @@ commented.
 [helpful]: https://github.com/Wilfred/helpful
 [historian]: https://github.com/PythonNut/historian.el
 [isearch]: https://www.gnu.org/software/emacs/manual/html_node/emacs/Incremental-Search.html
-[issues]: https://github.com/raxod502/radian/issues
+[issues]: https://github.com/raxod502/eow/issues
 [ivy]: https://github.com/abo-abo/swiper#ivy
 [javascript]: https://developer.mozilla.org/en-US/docs/Web/JavaScript
 [jsx]: https://reactjs.org/docs/introducing-jsx.html
@@ -305,7 +305,7 @@ commented.
 [prescient.el]: https://github.com/raxod502/prescient.el
 [prettier]: https://github.com/prettier/prettier
 [projectile]: http://batsov.com/projectile/
-[prs]: https://github.com/raxod502/radian/pulls
+[prs]: https://github.com/raxod502/eow/pulls
 [python]: https://www.python.org/
 [pyvenv]: https://github.com/jorgenschaefer/pyvenv
 [racket]: https://racket-lang.org/

@@ -8,8 +8,8 @@
 # Linux terminal emulators (presumably because they don't start login
 # shells, while macOS terminal emulators do for some reason). Thus we
 # need to use both, but for efficiency we read and write an
-# (unexported) environment variable RADIAN_SKIP_PROFILE to make sure
+# (unexported) environment variable EOW_SKIP_PROFILE to make sure
 # that we only source ~/.profile once in any given shell session.
 
 emulate sh -c '. "$HOME/.profile"'
-RADIAN_SKIP_PROFILE=1
+EOW_SKIP_PROFILE=1

@@ -3,13 +3,13 @@
 set -e
 set -o pipefail
 
-file="emacs/radian.el"
+file="emacs/eow.el"
 
 code="$(cat <<EOF
 
 (require 'checkdoc)
 
-;; radian.el is not a package, so don't lint it as one.
+;; eow.el is not a package, so don't lint it as one.
 (advice-add #'checkdoc-comments :override #'ignore)
 
 (checkdoc-file "$file")

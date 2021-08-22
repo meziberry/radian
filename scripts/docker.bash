@@ -18,7 +18,7 @@ docker() {
     fi
 }
 
-docker build . -t "radian:$tag" \
+docker build . -t "eow:$tag" \
        --build-arg "UID=$UID" \
        --build-arg "VERSION=$tag"
 
@@ -29,6 +29,6 @@ repos=".emacs.d/straight/repos"
 mkdir -p "$HOME/${repos}"
 
 docker run -it --rm \
-       -v "$PWD:/home/docker/radian" \
+       -v "$PWD:/home/docker/eow" \
        -v "$HOME/${repos}:/home/docker/${repos}" \
-       "radian:$tag" "${args[@]}"
+       "eow:$tag" "${args[@]}"

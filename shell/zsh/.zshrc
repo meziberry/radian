@@ -1,10 +1,10 @@
-## Locate Radian repository
+## Locate Eow repository
 
-# Set $RADIAN to the location of the Radian repository, if found.
-if [[ -L $0 && -d ${0:A:h}/radian-emacs ]]; then
-    export RADIAN=${0:A:h}
+# Set $EOW to the location of the Eow repository, if found.
+if [[ -L $0 && -d ${0:A:h}/eow-emacs ]]; then
+    export EOW=${0:A:h}
 else
-    unset RADIAN
+    unset EOW
 fi
 
 ## External configuration
@@ -16,24 +16,24 @@ fi
 
 ## zplugin
 
-radian_zplugin=
+eow_zplugin=
 
 if [[ -f /usr/share/zinit/zplugin.zsh ]]; then
-    radian_zplugin="/usr/share/zinit/zplugin.zsh"
+    eow_zplugin="/usr/share/zinit/zplugin.zsh"
 elif [[ -f /usr/share/zsh/plugin-managers/zplugin/zplugin.zsh ]]; then
-    radian_zplugin="/usr/share/zsh/plugin-managers/zplugin/zplugin.zsh"
+    eow_zplugin="/usr/share/zsh/plugin-managers/zplugin/zplugin.zsh"
 elif [[ -f ~/.zplugin/bin/zplugin.zsh ]]; then
-    radian_zplugin="$HOME/.zplugin/bin/zplugin.zsh"
+    eow_zplugin="$HOME/.zplugin/bin/zplugin.zsh"
 fi
 
-if [[ -n $radian_zplugin ]]; then
+if [[ -n $eow_zplugin ]]; then
     # zplugin will happily keep adding the same entry to PATH every
     # time you run it. Get rid of stale PATH entries. Thanks to
     # <https://stackoverflow.com/a/41876600/3538165>.
     path=(${path:#*/.zplugin/*})
 
     # https://github.com/zdharma/zplugin/blob/259ed171ba2b2ba013d61a2451a1c53fdd6291d4/doc/install.sh#L37-L39
-    . $radian_zplugin
+    . $eow_zplugin
     autoload -Uz _zplugin
     (( ${+_comps} )) && _comps[zplugin]=_zplugin
 
@@ -60,8 +60,8 @@ if [[ -n $radian_zplugin ]]; then
     zplugin ice blockf
     zplugin light zsh-users/zsh-completions
 
-    if typeset -f radian_zplugin_hook > /dev/null; then
-        radian_zplugin_hook
+    if typeset -f eow_zplugin_hook > /dev/null; then
+        eow_zplugin_hook
     fi
 
     autoload -Uz compinit
@@ -88,48 +88,48 @@ autoload -U colors && colors
 
 # Display the user@hostname. Then change the color and display the
 # working directory.
-radian_prompt_prefix='%{$fg[yellow]%}{%n@%m} %(?.%{$fg[blue]%}.%{$fg[red]%})%c'
+eow_prompt_prefix='%{$fg[yellow]%}{%n@%m} %(?.%{$fg[blue]%}.%{$fg[red]%})%c'
 
 # Change the color and then display a '%' or '#', then reset the color
 # for the user's input.
-radian_prompt_suffix='%(?.%{$fg[blue]%}.%{$fg[red]%}) %# %{$reset_color%}'
+eow_prompt_suffix='%(?.%{$fg[blue]%}.%{$fg[red]%}) %# %{$reset_color%}'
 
 PROMPT=
 
 if (( $+commands[git] )); then
 
-    # Usage: radian_prompt_git_dirty
+    # Usage: eow_prompt_git_dirty
     #
     # Print an asterisk if the working directory is dirty.
-    function radian_prompt_git_dirty {
+    function eow_prompt_git_dirty {
         emulate -LR zsh
         if [[ $(command git status --porcelain 2>/dev/null | tail -n1) ]]; then
             echo "*"
         fi
     }
 
-    # Usage: radian_prompt_git_info
+    # Usage: eow_prompt_git_info
     #
     # If inside a Git repository, print the branch or abbreviated
     # revision of the current HEAD, surrounded by square brackets and
     # followed by an asterisk if the working directory is dirty.
-    function radian_prompt_git_info {
+    function eow_prompt_git_info {
         emulate -LR zsh
         local ref
         ref=$(command git symbolic-ref HEAD 2> /dev/null) || \
             ref=$(command git rev-parse --short HEAD 2> /dev/null) || \
             return 0
-        echo "[${ref#refs/heads/}$(radian_prompt_git_dirty)]"
+        echo "[${ref#refs/heads/}$(eow_prompt_git_dirty)]"
     }
 
     # Reset the color and display the Git branch and modification
     # status.
-    PROMPT='%{$reset_color%}$(radian_prompt_git_info)'
+    PROMPT='%{$reset_color%}$(eow_prompt_git_info)'
 
 fi
 
-PROMPT="${radian_prompt_prefix}${PROMPT}"
-PROMPT="${PROMPT}${radian_prompt_suffix}"
+PROMPT="${eow_prompt_prefix}${PROMPT}"
+PROMPT="${PROMPT}${eow_prompt_suffix}"
 
 ### Command line
 
@@ -385,40 +385,40 @@ fi
 # Usage: copy <path>...
 #
 # Copy all of the paths provided to the clipboard, stored in the array
-# $RADIAN_CLIPBOARD.
+# $EOW_CLIPBOARD.
 function copy {
     emulate -LR zsh
-    RADIAN_CLIPBOARD=()
+    EOW_CLIPBOARD=()
     for target; do
-        RADIAN_CLIPBOARD+=(${target:a})
+        EOW_CLIPBOARD+=(${target:a})
     done
 }
 
 # Usage: paste [<path>]
 #
-# Invoke 'cp -R' on all paths in $RADIAN_CLIPBOARD as well as the
+# Invoke 'cp -R' on all paths in $EOW_CLIPBOARD as well as the
 # argument provided, which defaults to the current directory.
 function paste {
     emulate -LR zsh
-    cp -R $RADIAN_CLIPBOARD ${1:-.}
+    cp -R $EOW_CLIPBOARD ${1:-.}
 }
 
 # Usage: move [<path>]
 #
-# Invoke 'mv' on all paths in $RADIAN_CLIPBOARD as well as the
+# Invoke 'mv' on all paths in $EOW_CLIPBOARD as well as the
 # argument provided, which defaults to the current directory.
 function move {
     emulate -LR zsh
-    mv $RADIAN_CLIPBOARD ${1:-.}
+    mv $EOW_CLIPBOARD ${1:-.}
 }
 
 # Usage: pasteln [<path>]
 #
-# Invoke 'ln -s' on all paths in $RADIAN_CLIPBOARD as well as the
+# Invoke 'ln -s' on all paths in $EOW_CLIPBOARD as well as the
 # argument provided, which defaults to the current directory.
 function pasteln {
     emulate -LR zsh
-    ln -s $RADIAN_CLIPBOARD ${1:-.}
+    ln -s $EOW_CLIPBOARD ${1:-.}
 }
 
 # Usage: delink <path>
@@ -767,8 +767,8 @@ function man {
 
 ## External configuration hook
 
-if typeset -f radian_after_init_hook > /dev/null; then
-    radian_after_init_hook
+if typeset -f eow_after_init_hook > /dev/null; then
+    eow_after_init_hook
 fi
 
 ## Closing remarks

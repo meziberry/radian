@@ -13,7 +13,7 @@
 ;; Load an alternate ~/.emacs.d during regular init.
 (unless (getenv "USER_EMACS_DIRECTORY")
 
-  (defun radian--advice-fix-display-graphic-p (func &optional display)
+  (defun eow--advice-fix-display-graphic-p (func &optional display)
     "Fix `display-graphic-p' so it works while loading the early init-file."
     (if display
         (funcall func display)
@@ -23,9 +23,9 @@
       initial-window-system))
 
   (advice-add #'display-graphic-p :around
-              #'radian--advice-fix-display-graphic-p)
+              #'eow--advice-fix-display-graphic-p)
 
-  (defun radian--advice-fix-xw-display-color-p (func &optional display)
+  (defun eow--advice-fix-xw-display-color-p (func &optional display)
     "Fix `xw-display-color-p' so it works while loading the early init-file."
     (if (or display after-init-time)
         (funcall func display)
@@ -33,9 +33,9 @@
       initial-window-system))
 
   (advice-add #'xw-display-color-p :around
-              #'radian--advice-fix-xw-display-color-p)
+              #'eow--advice-fix-xw-display-color-p)
 
-  (defun radian--advice-disable-x-resource-application ()
+  (defun eow--advice-disable-x-resource-application ()
     "Disable `x-apply-session-resources'.
 Now, `x-apply-session-resources' normally gets called before
 reading the init-file. However if we do our initialization in the
@@ -45,12 +45,12 @@ disable it, since there's no real reason to respect X
 resources.")
 
   (advice-add #'x-apply-session-resources :override
-              #'radian--advice-disable-x-resource-application)
+              #'eow--advice-disable-x-resource-application)
 
   ;; Load the regular init-file.
   (load
    (expand-file-name "init.el" user-emacs-directory) nil 'nomessage 'nosuffix)
 
   ;; Avoid messing with things more than necessary.
-  (advice-remove #'display-graphic-p #'radian--advice-fix-display-graphic-p)
-  (advice-remove #'xw-display-color-p #'radian--advice-fix-xw-display-color-p))
+  (advice-remove #'display-graphic-p #'eow--advice-fix-display-graphic-p)
+  (advice-remove #'xw-display-color-p #'eow--advice-fix-xw-display-color-p))

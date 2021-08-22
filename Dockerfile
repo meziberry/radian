@@ -7,7 +7,7 @@ COPY scripts/docker-install.bash /tmp/
 RUN /tmp/docker-install.bash "$UID"
 
 USER $UID
-WORKDIR /home/docker/radian
+WORKDIR /home/docker/eow
 
 # If we don't do this, then the directory gets created in the
 # container filesystem with root ownership :/

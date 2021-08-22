@@ -21,11 +21,11 @@ build: ## Make sure straight.el dependencies are built
 	@scripts/build.bash
 
 .PHONY: compile
-compile: ## Byte-compile radian.el
+compile: ## Byte-compile eow.el
 	@scripts/byte-compile.bash
 
 .PHONY: checkdoc
-checkdoc: ## Check docstring style in radian.el
+checkdoc: ## Check docstring style in eow.el
 	@scripts/checkdoc.bash
 
 .PHONY: longlines
@@ -41,7 +41,7 @@ lint: build compile validate checkdoc longlines ## Run all linters
 
 .PHONY: clean
 clean: ## Remove build artifacts
-	@rm -f emacs/radian.elc
+	@rm -f emacs/eow.elc
 
 .PHONY: docker
 docker: ## Start a Docker shell; e.g. make docker VERSION=26
